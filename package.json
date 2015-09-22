@@ -1,0 +1,14 @@
+{
+    "name": "static-template-component",
+    "version": "0.0.0",
+    "description": "",
+    "main": "index.js",
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/relateiq/static-template-component.git"
+    },
+    "bugs": {
+        "url": "https://github.com/relateiq/static-template-component/issues"
+    },
+    "homepage": "https://github.com/relateiq/static-template-component#readme"
+}
