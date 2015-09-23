@@ -1,17 +1,17 @@
 {
-    "name": "static-template-component",
-    "version": "0.0.0",
-    "description": "",
-    "main": "index.js",
-    "publishConfig": {
-        "registry": "https://registry.npmjs.org/"
-    },
-    "repository": {
-        "type": "git",
-        "url": "git+https://github.com/relateiq/static-template-component.git"
-    },
-    "bugs": {
-        "url": "https://github.com/relateiq/static-template-component/issues"
-    },
-    "homepage": "https://github.com/relateiq/static-template-component#readme"
+  "name": "static-template-component",
+  "version": "0.0.1",
+  "description": "",
+  "main": "index.js",
+  "publishConfig": {
+    "registry": "https://registry.npmjs.org/"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/relateiq/static-template-component.git"
+  },
+  "bugs": {
+    "url": "https://github.com/relateiq/static-template-component/issues"
+  },
+  "homepage": "https://github.com/relateiq/static-template-component#readme"
 }
