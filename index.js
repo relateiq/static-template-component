@@ -1,4 +1,5 @@
 var STC_REGEX = /<stc\s+name="([^"]+)"\s*>(.*?)<\/stc>/g;
+var STC_CONTENTS_REGEX = /<stc-contents\s*\/>/;
 
 function StaticTemplateComponent() {
     this.template = this._template || '';
@@ -19,6 +20,7 @@ function StaticTemplateComponent() {
                 var postString = this.template.substring(STC_REGEX.lastIndex);
 
                 this.template = preString + depInstance.template + postString;
+                depInstance.template = depInstance.template.replace(STC_CONTENTS_REGEX, match[2] || '');
                 STC_REGEX.lastIndex += depInstance.template.length - match[0].length;
             } else {
                 console.warn('Missing StaticTemplateComponent dependency,', depName, 'for', this.name);
