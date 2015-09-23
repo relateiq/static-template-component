@@ -19,6 +19,10 @@ function StaticTemplateComponent() {
                 var preString = this.template.substring(0, startIndex);
                 var postString = this.template.substring(STC_REGEX.lastIndex);
 
+                if (!(depInstance instanceof StaticTemplateComponent)) {
+                    throw new Error('Invalid StaticTemplateComponent dependency. Must be instanceof StaticTemplateComponent');
+                }
+
                 this.template = preString + depInstance.template + postString;
                 depInstance.template = depInstance.template.replace(STC_CONTENTS_REGEX, match[2] || '');
                 STC_REGEX.lastIndex += depInstance.template.length - match[0].length;
@@ -34,11 +38,7 @@ function getDependencyByNameMap() {
 
     if (this.dependencies) {
         this.dependencies.forEach(function(dep) {
-            if (dep instanceof StaticTemplateComponent) {
-                result[dep.name] = dep;
-            } else {
-                throw new Error('Invalid StaticTemplateComponent dependency. Must be instanceof StaticTemplateComponent');
-            }
+            result[dep.name] = dep;
         });
     }
 
