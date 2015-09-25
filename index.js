@@ -8,13 +8,21 @@ function StaticTemplateComponent() {
         var depByNameMap = getDependencyByNameMap.call(this);
         var match;
 
+        STC_REGEX.lastIndex = 0;
 
         while ((match = STC_REGEX.exec(this.template))) {
             var depName = match[1];
             var depClass = depByNameMap[depName];
 
             if (depClass) {
-                var depInstance = new depClass.apply(null, arguments);
+                var storedLastIndex = STC_REGEX.lastIndex;
+                var args = Array.prototype.slice.call(arguments);
+                args.unshift(depClass);
+
+                var defFun = depClass.bind.apply(depClass, args);
+                var depInstance = new defFun();
+                STC_REGEX.lastIndex = storedLastIndex;
+
                 var startIndex = STC_REGEX.lastIndex - match[0].length;
                 var preString = this.template.substring(0, startIndex);
                 var postString = this.template.substring(STC_REGEX.lastIndex);
