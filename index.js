@@ -1,44 +1,83 @@
-var STC_REGEX = /<stc\s+name="([^"]+)"\s*>(.*?)<\/stc>/g;
-var STC_CONTENTS_REGEX = /<stc-contents\s*\/>/;
-
 function StaticTemplateComponent() {
-    this.template = this._template || '';
+    var container = document.createElement('div');
 
     if (this.dependencies && this._template) {
-        var depByNameMap = getDependencyByNameMap.call(this);
-        var match;
+        container.innerHTML = this._template;
+        compileDependencies.call(this, container);
+    } else if (this._template) {
+        container.innerHTML = this._template;
+    } else {
+        throw new Error('StaticTemplateComponent, ' + this.name + ', missing _template on instance');
+    }
 
-        STC_REGEX.lastIndex = 0;
+    this._element = container.children[0];
+    this.template = this._element.outerHTML;
+    container.innerHTML = '';
+}
 
-        while ((match = STC_REGEX.exec(this.template))) {
-            var depName = match[1];
-            var depClass = depByNameMap[depName];
+function compileDependencies(container) {
+    var self = this;
+    var children = Array.prototype.slice.call(container.querySelectorAll('stc'));
+    var depByNameMap = getDependencyByNameMap.call(self);
+    var depName, depClass, argsAttr, childArgs, defFun, depInstance;
 
-            if (depClass) {
-                var storedLastIndex = STC_REGEX.lastIndex;
-                var args = Array.prototype.slice.call(arguments);
-                args.unshift(depClass);
+    children.forEach(function(child) {
+        depName = child.getAttribute('name');
+        depClass = depByNameMap[depName];
 
-                var defFun = depClass.bind.apply(depClass, args);
-                var depInstance = new defFun();
-                STC_REGEX.lastIndex = storedLastIndex;
+        if (depClass) {
+            childArgs = [depClass];
 
-                var startIndex = STC_REGEX.lastIndex - match[0].length;
-                var preString = this.template.substring(0, startIndex);
-                var postString = this.template.substring(STC_REGEX.lastIndex);
+            if (self.args) {
+                argsAttr = child.getAttribute('args') || '';
+                argsAttr = argsAttr.split(/\s*,\s*/);
+                argsAttr.forEach(function(argKey) {
+                    childArgs.push(self.args[argKey]);
+                });
+            }
 
-                if (!(depInstance instanceof StaticTemplateComponent)) {
-                    throw new Error('Invalid StaticTemplateComponent dependency. Must be instanceof StaticTemplateComponent');
+            defFun = depClass.bind.apply(depClass, childArgs);
+            depInstance = new defFun();
+
+            if (!(depInstance instanceof StaticTemplateComponent)) {
+                throw new Error('Invalid StaticTemplateComponent dependency. Must be instanceof StaticTemplateComponent');
+            }
+
+            mergeAttributes(child, depInstance._element);
+            child.parentNode.replaceChild(depInstance._element, child);
+
+            var stcContents = depInstance._element.querySelector('stc-contents');
+
+            if (stcContents) {
+                while (child.childNodes.length > 0) {
+                    stcContents.parentNode.insertBefore(child.childNodes[0], stcContents);
                 }
 
-                this.template = preString + depInstance.template + postString;
-                depInstance.template = depInstance.template.replace(STC_CONTENTS_REGEX, match[2] || '');
-                STC_REGEX.lastIndex += depInstance.template.length - match[0].length;
-            } else {
-                console.warn('Missing StaticTemplateComponent dependency,', depName, 'for', this.name);
+                stcContents.parentNode.removeChild(stcContents);
             }
+        } else {
+            console.warn('Missing StaticTemplateComponent dependency,', depName, 'for', self.name);
         }
-    }
+    });
+}
+
+function mergeAttributes(src, dest) {
+    var srcAttrs = Array.prototype.slice.call(src.attributes);
+
+    srcAttrs.forEach(function(attr) {
+        var name = attr.nodeName;
+        var value = attr.nodeValue;
+
+        if (name === 'name' || name === 'args') {
+            return;
+        } else {
+            if (name === 'class') {
+                value = [dest.getAttribute('class'), value].join(' ');
+            }
+
+            dest.setAttribute(name, value);
+        }
+    });
 }
 
 function getDependencyByNameMap() {
