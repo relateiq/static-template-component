@@ -17,11 +17,20 @@ function StaticTemplateComponent() {
 
 function compileDependencies(container) {
     var self = this;
-    var children = Array.prototype.slice.call(container.querySelectorAll('stc'));
+    var stcChildren = Array.prototype.slice.call(container.querySelectorAll('stc'));
+    var stcIfChildren = Array.prototype.slice.call(container.querySelectorAll('[stc-if]'));
     var depByNameMap = getDependencyByNameMap.call(self);
     var depName, depClass, argsAttr, childArgs, defFun, depInstance;
 
-    children.forEach(function(child) {
+    stcIfChildren.forEach(function(ifChild) {
+        var ifAttr = ifChild.getAttribute('stc-if');
+
+        if (!self[ifAttr] && ifChild.parentNode) {
+            ifChild.parentNode.removeChild(ifChild);
+        }
+    });
+
+    stcChildren.forEach(function(child) {
         depName = child.getAttribute('name');
         depClass = depByNameMap[depName];
 
