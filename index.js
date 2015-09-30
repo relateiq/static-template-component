@@ -14,7 +14,7 @@ function StaticTemplateComponent() {
     }
 
     this._element = container.children[0];
-    this.template = this._element.outerHTML;
+    this.template = this._element && this._element.outerHTML || '';
     container.innerHTML = '';
 }
 
@@ -46,17 +46,21 @@ function compileDependencies(container) {
                 throw new Error('Invalid StaticTemplateComponent dependency. Must be instanceof StaticTemplateComponent');
             }
 
-            mergeAttributes(child, depInstance._element);
-            child.parentNode.replaceChild(depInstance._element, child);
+            if (depInstance._element) {
+                mergeAttributes(child, depInstance._element);
+                child.parentNode.replaceChild(depInstance._element, child);
 
-            var stcContents = depInstance._element.querySelector('stc-contents');
+                var stcContents = depInstance._element.querySelector('stc-contents');
 
-            if (stcContents) {
-                while (child.childNodes.length > 0) {
-                    stcContents.parentNode.insertBefore(child.childNodes[0], stcContents);
+                if (stcContents) {
+                    while (child.childNodes.length > 0) {
+                        stcContents.parentNode.insertBefore(child.childNodes[0], stcContents);
+                    }
+
+                    stcContents.parentNode.removeChild(stcContents);
                 }
-
-                stcContents.parentNode.removeChild(stcContents);
+            } else {
+                child.parentNode.removeChild(child);
             }
         } else {
             console.warn('Missing StaticTemplateComponent dependency,', depName, 'for', self.name);
