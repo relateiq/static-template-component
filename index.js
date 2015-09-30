@@ -1,13 +1,16 @@
 function StaticTemplateComponent() {
+    if (!this._template) {
+        throw new Error('StaticTemplateComponent, ' + this.name + ', missing _template on instance');
+    }
+
     var container = document.createElement('div');
 
-    if (this.dependencies && this._template) {
-        container.innerHTML = this._template;
+    container.innerHTML = this._template;
+
+    processStcIfAttrs.call(this, container);
+
+    if (this.dependencies) {
         compileDependencies.call(this, container);
-    } else if (this._template) {
-        container.innerHTML = this._template;
-    } else {
-        throw new Error('StaticTemplateComponent, ' + this.name + ', missing _template on instance');
     }
 
     this._element = container.children[0];
@@ -18,17 +21,8 @@ function StaticTemplateComponent() {
 function compileDependencies(container) {
     var self = this;
     var stcChildren = Array.prototype.slice.call(container.querySelectorAll('stc'));
-    var stcIfChildren = Array.prototype.slice.call(container.querySelectorAll('[stc-if]'));
     var depByNameMap = getDependencyByNameMap.call(self);
     var depName, depClass, argsAttr, childArgs, defFun, depInstance;
-
-    stcIfChildren.forEach(function(ifChild) {
-        var ifAttr = ifChild.getAttribute('stc-if');
-
-        if (!self[ifAttr] && ifChild.parentNode) {
-            ifChild.parentNode.removeChild(ifChild);
-        }
-    });
 
     stcChildren.forEach(function(child) {
         depName = child.getAttribute('name');
@@ -66,6 +60,19 @@ function compileDependencies(container) {
             }
         } else {
             console.warn('Missing StaticTemplateComponent dependency,', depName, 'for', self.name);
+        }
+    });
+}
+
+function processStcIfAttrs(container) {
+    var stcIfChildren = Array.prototype.slice.call(container.querySelectorAll('[stc-if]'));
+    var self = this;
+
+    stcIfChildren.forEach(function(ifChild) {
+        var ifAttr = ifChild.getAttribute('stc-if');
+
+        if (!self[ifAttr] && ifChild.parentNode) {
+            ifChild.parentNode.removeChild(ifChild);
         }
     });
 }
