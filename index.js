@@ -69,13 +69,16 @@ function compileDependencies(container) {
 }
 
 function processStcIfAttrs(container) {
-    var stcIfChildren = Array.prototype.slice.call(container.querySelectorAll('[stc-if]'));
+    var stcIfChildren = Array.prototype.slice.call(container.querySelectorAll('[stc-if], [stc-if-not]'));
     var self = this;
 
     stcIfChildren.forEach(function(ifChild) {
         var ifAttr = ifChild.getAttribute('stc-if');
+        var ifNotAttr = ifChild.getAttribute('stc-if-not');
+        var removeForIf = ifAttr ? !self[ifAttr] : false;
+        var removeForIfNot = ifNotAttr ? self[ifNotAttr] : false;
 
-        if (!self[ifAttr] && ifChild.parentNode) {
+        if (ifChild.parentNode && (removeForIf || removeForIfNot)) {
             ifChild.parentNode.removeChild(ifChild);
         }
     });
