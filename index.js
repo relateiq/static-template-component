@@ -13,8 +13,8 @@ function StaticTemplateComponent() {
         compileDependencies.call(this, container);
     }
 
-    this._element = container.children[0];
-    this.template = this._element && this._element.outerHTML || '';
+    this.element = container.children[0];
+    this.template = this.element && this.element.outerHTML || '';
     container.innerHTML = '';
 }
 
@@ -46,11 +46,11 @@ function compileDependencies(container) {
                 throw new Error('Invalid StaticTemplateComponent dependency. Must be instanceof StaticTemplateComponent');
             }
 
-            if (depInstance._element) {
-                mergeAttributes(child, depInstance._element);
-                child.parentNode.replaceChild(depInstance._element, child);
+            if (depInstance.element) {
+                mergeAttributes(child, depInstance.element);
+                child.parentNode.replaceChild(depInstance.element, child);
 
-                var stcContents = depInstance._element.querySelector('stc-contents');
+                var stcContents = depInstance.element.querySelector('stc-contents');
 
                 if (stcContents) {
                     while (child.childNodes.length > 0) {
