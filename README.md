@@ -125,7 +125,7 @@ ParentSTC.prototype.constructor = ParentSTC;
 
 function ChildSTC() {
     this.name = 'ChildSTC';
-    this._template = '<div> Before the contents <stc-contents/> After the contents </stc> </div>';
+    this._template = '<div> Before the contents <stc-contents/> After the contents </div>';
 
     StaticTemplateComponent.apply(this, arguments);
 }
