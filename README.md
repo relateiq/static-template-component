@@ -5,9 +5,9 @@ Similar to Angular 1.x directives, components are defined in Javascript and used
 Creating an instance of StaticTemplateComponent will compile a provided string template and replace HTML component dependecies with their own compiled representation. The instance will hold a reference to the resultant element and also the compile template.
 
 The reason why this was created was to address performance issues with Angular 1.x directive compilation and digest.
-Using this simple and fast Javascript based rendering of templates before $compile allowed Angular to not have to devote runtime exucution to compiling, watching, transluding, interpolating or even setting up a bind-once for perf-insensive pages.
+Using this simple and fast Javascript based rendering of templates before $compile allows Angular to not devote runtime execution to compiling, watching, transluding, interpolating or even setting up a bind-once for perf-insensive pages.
 
-##Usage
+##Basic Usage
 
 ```
 // StaticTemplateComponent is the base class your STC should inherit from
@@ -24,7 +24,7 @@ function MyExampleSTC(data) {
       MyNestedSTC
     ];
     
-    // this object is the data bus used to pass data to the HTML template and to nested components
+    // this is the object reference used to pass arguments to nested <stc /> through the template below
     this.args = {
         data: data
     };
@@ -47,8 +47,6 @@ function MyExampleSTC(data) {
 // Define MyNestedSTC used as a dependency above 
 function MyNestedSTC(data) {
     this.name = 'MyNestedSTC';
-    this.dependencies = [];
-    this.args = {};
     this._template = '<div>{text}</div>'.assign({
         text: data.foo + data.bar
     });
@@ -65,8 +63,45 @@ var myExampleSTC = new MyExampleSTC({ foo: 'test', bar: 123 });
 
 myExampleSTC.element // the compile element based on the MyExampleSTC _template
 myExampleSTC.template // the compile HTML string template based on the MyExampleSTC _template
+// compiles to ==> '<div> hello world <div>test123</div> </div>'
 
-// myExampleSTC.template should be equal to:
-// '<div> hello world <div>test123</div> </div>'
+```
 
+##stc-if
+
+Only retain an element in the compiled result if the evaluated stc-if attr value is truthy on the STC instance.
+
+```
+function IfSTC(data) {
+    this.name = 'MyNestedSTC';
+    this.showSpan = data.foo; // any expression is permitted
+    
+    // the <span> will only exist in the compiled result if this.showSpan is truthy
+    this._template = '<div> <span stc-if="showSpan"></span> </div>';
+
+    StaticTemplateComponent.apply(this, arguments);
+}
+
+IfSTC.prototype = Object.create(StaticTemplateComponent.prototype);
+IfSTC.prototype.constructor = IfSTC;
+```
+
+##stc-if-not
+
+The opposite condition of stc-if.
+Only retain an element in the compiled result if the evaluated stc-if attr value is falsey on the STC instance.
+
+```
+function IfSTC(data) {
+    this.name = 'MyNestedSTC';
+    this.hideSpan = data.foo; // any expression is permitted
+    
+    // the <span> will only exist in the compiled result if this.hideSpan is falsey
+    this._template = '<div> <span stc-if-not="hideSpan"></span> </div>';
+
+    StaticTemplateComponent.apply(this, arguments);
+}
+
+IfSTC.prototype = Object.create(StaticTemplateComponent.prototype);
+IfSTC.prototype.constructor = IfSTC;
 ```
