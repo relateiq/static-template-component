@@ -115,7 +115,7 @@ The appearance of the <stc-contents /> tag in a component's template defines the
 ```
 function ParentSTC() {
     this.name = 'ParentSTC';
-    this._template = '<div> <stc name="ChildSTC">Any HTML insde here will be inserted where stc-contents is found</span> </stc> </div>';
+    this._template = '<div> <stc name="ChildSTC">Any HTML insde here will be inserted where stc-contents is found</stc> </div>';
 
     StaticTemplateComponent.apply(this, arguments);
 }
