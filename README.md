@@ -4,6 +4,9 @@ A static template component (STC) is a lightweight utility class for rendering H
 Similar to Angular 1.x directives, components are defined in Javascript and used as HTML elements.
 Creating an instance of StaticTemplateComponent will compile a provided string template and replace HTML component dependecies with their own compiled representation. The instance will hold a reference to the resultant element and also the compile template.
 
+The reason why this was created was to address performance issues with Angular 1.x directive compilation and digest.
+Using this simple and fast Javascript based rendering of templates before $compile allowed Angular to not have to devote runtime exucution to compiling, watching, transluding, interpolating or even setting up a bind-once for perf-insensive pages.
+
 ##Usage
 
 ```
@@ -55,4 +58,15 @@ function MyNestedSTC(data) {
 
 MyNestedSTC.prototype = Object.create(StaticTemplateComponent.prototype);
 MyNestedSTC.prototype.constructor = MyNestedSTC;
+
+
+// With the above code context, I can instantiate my MyExampleSTC
+var myExampleSTC = new MyExampleSTC({ foo: 'test', bar: 123 });
+
+myExampleSTC.element // the compile element based on the MyExampleSTC _template
+myExampleSTC.template // the compile HTML string template based on the MyExampleSTC _template
+
+// myExampleSTC.template should be equal to:
+// '<div> hello world <div>test123</div> </div>'
+
 ```
