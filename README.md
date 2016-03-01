@@ -30,12 +30,14 @@ function MyExampleSTC(data) {
     };
 
 
-    // string template for this component
-    // Data reference evaluation is simply keying into the this.args object my name (e.g. data in the template is === this.args.data)
+    // Below is the string template for this component
+    // Nested STCs are defined by a <stc> element and references my the `name` attribute
     // The args="data" attribute on the nested <stc /> defines the arguments that the MyNestedSTC dependency will be instantiated with
-    // the .assign() is optional. It is a SugarJS function (can use anything really) that replaces the {text} in the template
-    // with the 'hello world' value in this example
+    // The args attribute value can be a comma separated string of references in the this.args object (e.g. args="thing1, thing2")
     // An error will be thrown if a nested <stc/> component appears in the template that is not declare in the this.dependencies array
+    // The .assign() is optional. It is a SugarJS function (any string interpolation tool will do) that replaces the {text} in the
+    // template with the 'hello world' value in this example
+    
     this._template = '<div> {text} <stc name="MyNestedSTC" args="data"></stc> </div>'.assign({
         text: 'hello world'
     });
@@ -73,7 +75,7 @@ Only retain an element in the compiled result if the evaluated stc-if attr value
 
 ```
 function IfSTC(data) {
-    this.name = 'MyNestedSTC';
+    this.name = 'IfSTC';
     this.showSpan = data.foo; // any expression is permitted
     
     // the <span> will only exist in the compiled result if this.showSpan is truthy
@@ -92,8 +94,8 @@ The opposite condition of stc-if.
 Only retain an element in the compiled result if the evaluated stc-if attr value is falsey on the STC instance.
 
 ```
-function IfSTC(data) {
-    this.name = 'MyNestedSTC';
+function IfNotSTC(data) {
+    this.name = 'IfNotSTC';
     this.hideSpan = data.foo; // any expression is permitted
     
     // the <span> will only exist in the compiled result if this.hideSpan is falsey
@@ -102,6 +104,32 @@ function IfSTC(data) {
     StaticTemplateComponent.apply(this, arguments);
 }
 
-IfSTC.prototype = Object.create(StaticTemplateComponent.prototype);
-IfSTC.prototype.constructor = IfSTC;
+IfNotSTC.prototype = Object.create(StaticTemplateComponent.prototype);
+IfNotSTC.prototype.constructor = IfNotSTC;
+```
+
+##stc-contents
+
+The appearance of the <stc-contents /> tag in a component's template defines the insertion point for any children of an <stc> dependency.
+
+```
+function ParentSTC() {
+    this.name = 'ParentSTC';
+    this._template = '<div> <stc name="ChildSTC">Any HTML insde here will be inserted where stc-contents is found</span> </stc> </div>';
+
+    StaticTemplateComponent.apply(this, arguments);
+}
+
+ParentSTC.prototype = Object.create(StaticTemplateComponent.prototype);
+ParentSTC.prototype.constructor = ParentSTC;
+
+function ChildSTC() {
+    this.name = 'ChildSTC';
+    this._template = '<div> Before the contents <stc-contents/> After the contents </stc> </div>';
+
+    StaticTemplateComponent.apply(this, arguments);
+}
+
+ChildSTC.prototype = Object.create(StaticTemplateComponent.prototype);
+ChildSTC.prototype.constructor = ChildSTC;
 ```
